@@ -1,11 +1,14 @@
-# Music-Player-Using-Python
-By Anurag Nepal 
-For IOT mini Project
+# Music Player
 
-# Steps to run
-Step 1 : Open the folder in VS code.</br>
-Step 2 : run in terminal
-	pip install -r requirements.txt </br>
-Step 3: create folder in C: drive as name "Music". </br>
-Step 4: Add the music you want to play in that folder.</br>
-Step 5: run the code. Enjoy the music</br>
+A desktop music player built with Python and Tkinter.
+
+It plays local audio files with play, pause, stop, forward, and back controls.
+
+## Running
+
+```bash
+pip install -r requirements.txt
+python player.py
+```
+
+Put your music files in a folder named `Music` on the C: drive before starting.
