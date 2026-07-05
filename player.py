@@ -1,5 +1,3 @@
-from cProfile import label
-from itertools import count
 from tkinter import *
 import pygame
 from tkinter import filedialog
@@ -7,6 +5,27 @@ import time
 from mutagen.mp3 import MP3
 import tkinter.ttk as ttk
 import os
+import sys
+
+# The music folder used to be hardcoded to C:/Music, which only worked on
+# Windows. Pass a folder on the command line, set MUSIC_DIR, or pick one
+# in the dialog at startup; otherwise the current directory is used.
+def get_music_dir():
+    if len(sys.argv) > 1:
+        return sys.argv[1]
+    if os.environ.get("MUSIC_DIR"):
+        return os.environ["MUSIC_DIR"]
+    try:
+        chosen = filedialog.askdirectory(title="Choose your music folder")
+        if chosen:
+            return chosen
+    except Exception:
+        pass
+    return os.getcwd()
+
+MUSIC_DIR = get_music_dir()
+def song_path(name):
+    return os.path.join(MUSIC_DIR, name)
 
 global paused
 paused = False 
@@ -16,7 +35,7 @@ def play_time():
     current_time = pygame.mixer.music.get_pos() / 1000
     converted_current_time = time.strftime('%M:%S', time.gmtime(current_time))
     song = song_box.get(ACTIVE)
-    song = f'C:/Music/{song}'
+    song = song_path(song)
     song_mut = MP3(song)
     global song_length
     song_length = song_mut.info.length
@@ -24,7 +43,6 @@ def play_time():
     current_time +=1
     if int(my_slider.get()) == int(song_length):
         status_bar.config(text=f'Time Elapsed: {converted_song_length}  of  {converted_song_length}  ')
-        time.sleep(15)
         next_song()
     elif int(my_slider.get()) == int(current_time):
         slider_position = int(song_length)
@@ -46,7 +64,7 @@ def playsong():
     global paused
     paused= False
     song = song_box.get(ACTIVE)
-    song = f'C:/Music/{song}'
+    song = song_path(song)
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     play_time()
@@ -80,12 +98,11 @@ def next_song():
     my_slider.config(value=0)
     next_one = song_box.curselection()
     next_one=next_one[0]+1
-    song=song_box.get(next_one)
-    if (next_one==count_songs):
-        song=song_box.get(0)
+    if (next_one>=count_songs):
         next_one=0
+    song=song_box.get(next_one)
     print(song)
-    song= f'C:/Music/{song}'
+    song = song_path(song)
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     song_box.selection_clear(0, END)
@@ -95,12 +112,11 @@ def next_song():
 def prev_song():
     next_one = song_box.curselection()
     next_one=next_one[0]-1
-    song=song_box.get(next_one)
-    if (next_one==-1):
-        song=song_box.get(count_songs-1)
+    if (next_one<0):
         next_one=count_songs-1
+    song=song_box.get(next_one)
     print(song)
-    song= f'C:/Music/{song}'
+    song = song_path(song)
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
     song_box.selection_clear(0, END)
@@ -112,7 +128,7 @@ def volume(X):
     current_volume = pygame.mixer.music.get_volume()*100
 def slide(x):
     song = song_box.get(ACTIVE)
-    song = f'C:/Music/{song}'
+    song = song_path(song)
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0, start=int(my_slider.get()))
 
@@ -164,7 +180,7 @@ volume_slider.grid(row=1,column=1)
 global count_songs
 count_songs=0
 
-os.chdir(f'C:/Music/')
+os.chdir(MUSIC_DIR)
 songs=os.listdir()
 for s in songs:
     count_songs=count_songs+1
